@@ -1,0 +1,6 @@
+{
+  "name": "Attendance Information Assistant",
+  "description": "AI-powered academic attendance assistant for students, teachers, and administrators at SNJB KBJ COE Chandwad. Calculate attendance shortages, analyze reports, and explore college policies.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

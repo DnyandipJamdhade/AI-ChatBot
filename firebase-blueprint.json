@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with role-based access information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Unique Firebase Auth user ID" },
+        "email": { "type": "string", "description": "User email address" },
+        "displayName": { "type": "string", "description": "Full name of the user" },
+        "role": { "type": "string", "enum": ["student", "teacher", "admin"], "description": "User role in the institution" },
+        "rollNo": { "type": "string", "description": "Student roll number if applicable" },
+        "department": { "type": "string", "description": "Academic department" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation timestamp" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "AttendanceRecord": {
+      "title": "AttendanceRecord",
+      "description": "Student course attendance entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique attendance record ID" },
+        "userId": { "type": "string", "description": "User ID of student or creator" },
+        "studentName": { "type": "string", "description": "Student name" },
+        "rollNo": { "type": "string", "description": "Student roll number" },
+        "subjectCode": { "type": "string", "description": "Subject or course code" },
+        "subjectName": { "type": "string", "description": "Subject name" },
+        "attended": { "type": "number", "description": "Classes attended count" },
+        "totalConducted": { "type": "number", "description": "Total classes conducted count" },
+        "percentage": { "type": "number", "description": "Calculated attendance percentage" },
+        "status": { "type": "string", "enum": ["safe", "warning", "critical"], "description": "Attendance status tier" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["userId", "subjectCode", "attended", "totalConducted", "percentage"]
+    },
+    "AttendanceReport": {
+      "title": "AttendanceReport",
+      "description": "Imported attendance report summary metadata",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique report ID" },
+        "fileName": { "type": "string", "description": "Name of uploaded CSV file" },
+        "uploadedBy": { "type": "string", "description": "User ID of uploader" },
+        "classYear": { "type": "string", "description": "Class or academic division" },
+        "totalRecords": { "type": "number", "description": "Total rows processed" },
+        "classAverage": { "type": "number", "description": "Class average attendance percentage" },
+        "defaultersCount": { "type": "number", "description": "Number of students below 75%" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Upload timestamp" }
+      },
+      "required": ["fileName", "uploadedBy", "totalRecords"]
+    },
+    "AuditLogEntry": {
+      "title": "AuditLogEntry",
+      "description": "Administrative audit event",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Audit event ID" },
+        "action": { "type": "string", "description": "Action performed" },
+        "adminUid": { "type": "string", "description": "UID of admin who performed action" },
+        "adminName": { "type": "string", "description": "Name or email of admin" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Event timestamp" },
+        "details": { "type": "string", "description": "Additional event context" }
+      },
+      "required": ["action", "adminUid", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profile documents keyed by Firebase Auth UID"
+    },
+    "/attendanceRecords/{recordId}": {
+      "schema": { "$ref": "#/entities/AttendanceRecord" },
+      "description": "Student attendance records"
+    },
+    "/attendanceReports/{reportId}": {
+      "schema": { "$ref": "#/entities/AttendanceReport" },
+      "description": "Imported batch attendance reports"
+    },
+    "/auditLogs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLogEntry" },
+      "description": "System audit trail"
+    }
+  }
+}

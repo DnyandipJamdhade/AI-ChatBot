@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isTeacherOrAdmin() {
+      return isAuthenticated() && (getUserRole() == 'teacher' || getUserRole() == 'admin');
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'admin';
+    }
+
+    // Connection test document
+    match /test/{docId} {
+      allow read, write: if true;
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) || isAdmin();
+    }
+
+    // Attendance Records
+    match /attendanceRecords/{recordId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isTeacherOrAdmin());
+      allow create: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isTeacherOrAdmin());
+      allow update, delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isTeacherOrAdmin());
+    }
+
+    // Attendance Reports
+    match /attendanceReports/{reportId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isTeacherOrAdmin();
+    }
+
+    // Audit Logs
+    match /auditLogs/{logId} {
+      allow read: if isTeacherOrAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // Immutable audit trail
+    }
+  }
+}
